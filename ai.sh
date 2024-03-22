@@ -5,7 +5,7 @@
 #- NOTESPATH, a location for notes; JFHCI for now
 #- mdcat, to display output with md formatting
 
-NOTESPATH="$HOME/OneDrive - Merito/notes/ai"
+NOTESPATH="$HOME/whereveryournotesgo"
 
 # generate datestamped filename and notes path
 FILENAME="file_$(date -u +'%Y%m%dT%H%M%S').md"
