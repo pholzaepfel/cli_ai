@@ -13,8 +13,17 @@ FILENAME="$NOTESPATH/$FILENAME"
 
 # clean up newlines so text insertion doesn't cause errors
 # FIXME: this is a kludge 
-arg=$1
-arg_clean=$(echo "$arg" | tr -d '\n\\\"')
+
+# Check if there's something piped in on STDIN
+if [ -p /dev/stdin ]; then
+    # Read from STDIN into CONTENT
+    CONTENT=$(cat)
+else
+    # Use the first argument as CONTENT
+    CONTENT=$1
+fi
+
+CONTENT_CLEAN=$(echo "$CONTENT" | tr -d '\n\\\"')
 
 # Create the timestamped file, starting with the prompt
 echo "$1" >>"$FILENAME"
@@ -25,6 +34,6 @@ curl -s -q https://api.openai.com/v1/chat/completions \
   -H "Authorization: Bearer $OPENAI_API_KEY" \
   -d "{
   \"model\": \"gpt-4\",
-  \"messages\": [{\"role\": \"user\", \"content\": \"$arg_clean\"}],
+  \"messages\": [{\"role\": \"user\", \"content\": \"$CONTENT_CLEAN\"}],
   \"temperature\": 0
 }" | jq -r ".choices[0].message.content // \"ERROR: \" + .error.message" | tee -a "$FILENAME" | mdcat
