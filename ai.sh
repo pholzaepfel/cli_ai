@@ -3,6 +3,9 @@
 #prereqs
 #- env variable OPENAI_API_KEY
 #- mdcat, to display output with md formatting
+#- jq
+
+
 
 # Check if there's something piped in on STDIN
 if [ -p /dev/stdin ]; then
@@ -13,18 +16,7 @@ else
     CONTENT=$1
 fi
 
-# Escape newlines
-CONTENT_CLEAN=$(echo "$CONTENT" | sed -e 's/\"/\\"/g')
-
-# Create the timestamped file, starting with the prompt
-
-cat <<EOF > /tmp/ai-payload.js
-{
-  "model": "gpt-4o",
-  "messages": [{"role": "user", "content": "$CONTENT_CLEAN"}],
-  "temperature": 0
-}
-EOF
+jq -Rrs --arg str "$CONTENT" '{ "model": "gpt-4o", "messages": [{"role": "user", "content": $str}], "temperature": 0 }' <<< "" > /tmp/ai-payload.js
 
 curl -s -d@/tmp/ai-payload.js -q https://api.openai.com/v1/chat/completions \
   -H "Content-Type: application/json" \
