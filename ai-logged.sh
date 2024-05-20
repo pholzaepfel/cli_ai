@@ -2,7 +2,14 @@
 
 #prereqs
 #- env variable OPENAI_API_KEY
+#- NOTESPATH, a location for notes; JFHCI for now
 #- mdcat, to display output with md formatting
+
+NOTESPATH="$HOME/whereveryournotesgo"
+
+# generate datestamped filename and notes path
+FILENAME="file_$(date -u +'%Y%m%dT%H%M%S').md"
+FILENAME="$NOTESPATH/$FILENAME"
 
 # Check if there's something piped in on STDIN
 if [ -p /dev/stdin ]; then
@@ -17,6 +24,8 @@ fi
 CONTENT_CLEAN=$(echo "$CONTENT" | sed -e 's/\"/\\"/g')
 
 # Create the timestamped file, starting with the prompt
+echo "$1" >>"$FILENAME"
+echo "" >>"$FILENAME"
 
 cat <<EOF > payload.js
 {
@@ -29,4 +38,4 @@ EOF
 curl -s -d@payload.js -q https://api.openai.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $OPENAI_API_KEY" \
-| jq -r ".choices[0].message.content // \"ERROR: \" + .error.message" | mdcat
+| jq -r ".choices[0].message.content // \"ERROR: \" + .error.message" | tee -a "$FILENAME" | mdcat
