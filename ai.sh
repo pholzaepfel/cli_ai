@@ -18,7 +18,7 @@ CONTENT_CLEAN=$(echo "$CONTENT" | sed -e 's/\"/\\"/g')
 
 # Create the timestamped file, starting with the prompt
 
-cat <<EOF > payload.js
+cat <<EOF > /tmp/ai-payload.js
 {
   "model": "gpt-4o",
   "messages": [{"role": "user", "content": "$CONTENT_CLEAN"}],
@@ -26,7 +26,7 @@ cat <<EOF > payload.js
 }
 EOF
 
-curl -s -d@payload.js -q https://api.openai.com/v1/chat/completions \
+curl -s -d@/tmp/ai-payload.js -q https://api.openai.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $OPENAI_API_KEY" \
 | jq -r ".choices[0].message.content // \"ERROR: \" + .error.message" | mdcat
